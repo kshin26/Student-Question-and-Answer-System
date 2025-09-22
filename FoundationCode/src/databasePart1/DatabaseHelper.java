@@ -35,7 +35,12 @@ public class DatabaseHelper {
 			statement = connection.createStatement(); 
 			// You can use this command to clear the database and restart from fresh.
 			//statement.execute("DROP ALL OBJECTS");
-
+			
+			//TEMP
+			//statement.execute("DROP TABLE IF EXISTS cse360users");
+			//statement.execute("DROP TABLE IF EXISTS InvitationCodes");
+			//createTables();
+			
 			createTables();  // Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
@@ -168,6 +173,15 @@ public class DatabaseHelper {
 	        e.printStackTrace();
 	    }
 	}
+	
+	public void updatePassword(String userName, String newPassword) {
+        String sql = "UPDATE cse360users SET password=? WHERE userName=?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newPassword);
+            pstmt.setString(2, userName);
+            pstmt.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
 
 	// Closes the database connection and statement.
 	public void closeConnection() {
