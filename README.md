@@ -35,3 +35,7 @@ Simple and clear navigation flow.
 Immediate feedback on actions like login errors or account updates.
 Consistent input fields and descriptive buttons.
 Basic accessibility with labels and focusable fields.
+
+# To Start
+
+run StartCSE360.java with configurations for FoundationCode
