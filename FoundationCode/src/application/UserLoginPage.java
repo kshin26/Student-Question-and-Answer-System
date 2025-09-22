@@ -22,59 +22,54 @@ public class UserLoginPage {
     }
 
     public void show(Stage primaryStage) {
-    	// Input field for the user's userName, password
-        TextField userNameField = new TextField();
-        userNameField.setPromptText("Enter userName");
-        userNameField.setMaxWidth(250);
-
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Enter Password");
-        passwordField.setMaxWidth(250);
-        
-        // Label to display error messages
-        Label errorLabel = new Label();
-        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
-
-
-        Button loginButton = new Button("Login");
-        
-        loginButton.setOnAction(a -> {
-        	// Retrieve user inputs
-            String userName = userNameField.getText();
-            String password = passwordField.getText();
-            try {
-            	User user=new User(userName, password, "");
-            	WelcomeLoginPage welcomeLoginPage = new WelcomeLoginPage(databaseHelper);
-            	
-            	// Retrieve the user's role from the database using userName
-            	String role = databaseHelper.getUserRole(userName);
-            	
-            	if(role!=null) {
-            		user.setRole(role);
-            		if(databaseHelper.login(user)) {
-            			welcomeLoginPage.show(primaryStage,user);
-            		}
-            		else {
-            			// Display an error if the login fails
-                        errorLabel.setText("Error logging in");
-            		}
-            	}
-            	else {
-            		// Display an error if the account does not exist
-                    errorLabel.setText("user account doesn't exists");
-            	}
-            	
-            } catch (SQLException e) {
-                System.err.println("Database error: " + e.getMessage());
-                e.printStackTrace();
-            } 
-        });
-
         VBox layout = new VBox(10);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
-        layout.getChildren().addAll(userNameField, passwordField, loginButton, errorLabel);
 
-        primaryStage.setScene(new Scene(layout, 800, 400));
+        TextField userNameField = new TextField();
+        userNameField.setPromptText("Username (5-20 alphanumeric)");
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+
+        Label feedbackLabel = new Label();
+        feedbackLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+
+        Button loginButton = new Button("Login");
+        loginButton.setOnAction(a -> {
+            String username = userNameField.getText();
+            String password = passwordField.getText();
+
+            if (!username.matches("[a-zA-Z0-9]{5,20}")) {
+                feedbackLabel.setText("Username must be 5–20 characters and letters/numbers only.");
+                return;
+            }
+            if (password.isEmpty()) {
+                feedbackLabel.setText("Please enter your password.");
+                return;
+            }
+
+            try {
+                User user = new User(username, password, "");
+                String role = databaseHelper.getUserRole(username);
+                if (role != null) {
+                    user.setRole(role);
+                    if (databaseHelper.login(user)) {
+                        new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
+                    } else {
+                        feedbackLabel.setText("Incorrect username or password.");
+                    }
+                } else {
+                    feedbackLabel.setText("Account does not exist.");
+                }
+            } catch (SQLException e) {
+                feedbackLabel.setText("Database error: " + e.getMessage());
+            }
+        });
+
+        layout.getChildren().addAll(userNameField, passwordField, loginButton, feedbackLabel);
+
+        Scene loginScene = new Scene(layout, 600, 350);
+        primaryStage.setScene(loginScene);
         primaryStage.setTitle("User Login");
         primaryStage.show();
     }
